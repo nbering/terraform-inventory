@@ -1,0 +1,29 @@
+{
+  "name": "@nbering/terraform-inventory",
+  "version": "0.0.1",
+  "description": "Ansible dynamic inventory from Terraform state.",
+  "main": "index.js",
+  "bin": {
+    "terraform-inventory": "./index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublish": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/nbering/terraform-inventory.git"
+  },
+  "author": "Nicholas Bering <bering.nicholas@gmail.com>",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/nbering/terraform-inventory/issues"
+  },
+  "homepage": "https://github.com/nbering/terraform-inventory#readme",
+  "devDependencies": {
+    "@types/node": "^8.0.19",
+    "typescript": "^2.4.2"
+  },
+  "private": true
+}
