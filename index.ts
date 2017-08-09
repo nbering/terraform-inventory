@@ -4,7 +4,7 @@ import * as tfstate from "./lib/tfstate";
 import * as fs from "fs";
 
 var stateData;
-var stateText = cp.spawnSync("terraform state pull", {shell: true});
+var stateText = cp.spawnSync("terraform state pull", {shell: true}).stdout;
 
 try {
     stateData = JSON.parse(stateText.toString());
@@ -18,7 +18,8 @@ class AnsibleInventory{
     private _hostvars = new Map<string, {[k:string]: any}>();
 
     addHost(attrs: tfstate.hostResourceAttrs){
-        this._hostvars.set(attrs.inventory_hostname, attrs.vars);
+        let vars = getMap("vars", attrs);
+        this._hostvars.set(attrs.inventory_hostname, vars);
         this._groups["all"] = this._groups["all"] || [];
         this._groups["all"].push(attrs.inventory_hostname);
     }
@@ -41,7 +42,27 @@ walkState(stateData);
 
 console.log(inventory.toString());
 
-function panic(err: any){}
+function panic(err: any){
+    process.exit(1);
+}
+
+function getMap(key: string, source: {[key: string]: any}){
+    let out: any = {};
+    let filterExpression = new RegExp(`^${key}\.(.*)`);
+    Object.keys(source)
+        .filter(val => filterExpression.test(val))
+        .map(val => {
+            let match = val.match(filterExpression) || [];
+            return match[1];
+        })
+        .forEach(subkey => {
+            // Bail out terraform count field.
+            if (subkey == "%")
+                return;
+            out[subkey] = source[`${key}.${subkey}`]
+        });
+    return out;
+}
 
 function walkState(state: tfstate.tfstate){
     var module, rkey, res;
