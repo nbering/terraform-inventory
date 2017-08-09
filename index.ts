@@ -3,8 +3,10 @@ import * as cp from "child_process";
 import * as tfstate from "./lib/tfstate";
 import * as fs from "fs";
 
+var terraformPath = process.env["TERRAFORM_PATH"] || "terraform10";
+
 var stateData;
-var stateText = cp.spawnSync("terraform state pull", {shell: true}).stdout;
+var stateText = cp.spawnSync(`${terraformPath} state pull`, {shell: true}).stdout;
 
 try {
     stateData = JSON.parse(stateText.toString());
