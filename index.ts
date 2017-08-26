@@ -21,9 +21,22 @@ class AnsibleInventory{
 
     addHost(attrs: tfstate.hostResourceAttrs){
         let vars = getMap("vars", attrs);
-        this._hostvars.set(attrs.inventory_hostname, vars);
-        this._groups["all"] = this._groups["all"] || [];
-        this._groups["all"].push(attrs.inventory_hostname);
+        let groups = getList("groups", attrs);
+        let host = attrs.inventory_hostname;
+
+        this._hostvars.set(host, vars);
+
+        if (groups.indexOf("all") < 0)
+            groups.push("all");
+
+        groups.forEach(g => {
+            this.appendToGroup(host, g);
+        });
+    }
+
+    private appendToGroup(hostname: string, group: string){
+        this._groups[group] = this._groups[group] || [];
+        this._groups[group].push(hostname);
     }
 
     toString(): string{
@@ -64,6 +77,41 @@ function getMap(key: string, source: {[key: string]: any}){
             out[subkey] = source[`${key}.${subkey}`]
         });
     return out;
+}
+
+function getList(key: string, source: {[key: string]: any}){
+    let out: any[] = [];
+    let filterExpression = new RegExp(`^${key}\.(#|[0-9]+)$`);
+    Object.keys(source)
+        .filter(val => filterExpression.test(val))
+        .map(val => {
+            let match = val.match(filterExpression) || [];
+
+            // If it's the count field, initilized
+            if (match[1] === "#"){
+                // This is a side-effect, which is to be avoided
+                // with this type of functional compositiion...
+                // but it makes this so much easier to write.
+                out = new Array<any>(<number>source[val]);
+
+                return -2;
+            }
+
+            // Conversion is a number, so return a number.
+            return +match[1];
+        })
+        .forEach(index => {
+            // Exit when flag is hit from count field.
+            if (index === -2)
+                return;
+
+            if (!out)
+                panic(new Error("List from state value did not have a count field."));
+
+            out[index] = source[`${key}.${index}`];
+        });
+
+    return out || null;
 }
 
 function walkState(state: tfstate.tfstate){
