@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/nbering/terraform-inventory.git"
+    "url": "git+ssh://git@gitlab.com/nbering/terraform-inventory.git"
   },
   "author": "Nicholas Bering <bering.nicholas@gmail.com>",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/nbering/terraform-inventory/issues"
+    "url": "https://gitlab.com/nbering/terraform-inventory/issues"
   },
-  "homepage": "https://github.com/nbering/terraform-inventory#readme",
+  "homepage": "https://gitlab.com/nbering/terraform-inventory#readme",
   "devDependencies": {
     "@types/node": "^8.0.19",
     "typescript": "^2.4.2"
