@@ -92,7 +92,7 @@ function getList(key: string, source: {[key: string]: any}){
                 // This is a side-effect, which is to be avoided
                 // with this type of functional compositiion...
                 // but it makes this so much easier to write.
-                out = new Array<any>(<number>source[val]);
+                out = new Array<any>(+source[val]);
 
                 return -2;
             }
