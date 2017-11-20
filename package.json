@@ -16,7 +16,7 @@
     "url": "git+ssh://git@gitlab.com/nbering/terraform-inventory.git"
   },
   "author": "Nicholas Bering <bering.nicholas@gmail.com>",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "bugs": {
     "url": "https://gitlab.com/nbering/terraform-inventory/issues"
   },
@@ -24,6 +24,5 @@
   "devDependencies": {
     "@types/node": "^8.0.19",
     "typescript": "^2.4.2"
-  },
-  "private": true
+  }
 }
