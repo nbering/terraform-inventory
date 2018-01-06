@@ -45,4 +45,4 @@ changelog.
 
 Licensed for use under the [MIT License](./LICENSE).
 
-[1]: https://gitlab.com/nbering/terraform-provider-ansible/
+[1]: https://github.com/nbering/terraform-provider-ansible/
