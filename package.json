@@ -1,6 +1,6 @@
 {
   "name": "@nbering/terraform-inventory",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Ansible dynamic inventory from Terraform state.",
   "main": "index.js",
   "bin": {
