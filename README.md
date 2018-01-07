@@ -6,9 +6,9 @@ Terraform Provider for it's own installation and use.
 
 ## Usage
 
-Copy the [terraform.py](./terraform.py) to a location on your system. Ansible's own documentation suggests the location `/etc/ansible/terraform.py`, but the particular location does not matter to the script. Ensure it has executable permissions (`chmod +x /etc/ansible/terraform.py`).
+Copy the [terraform.py](./terraform.py) script file to a location on your system. Ansible's own documentation suggests the location `/etc/ansible/terraform.py`, but the particular location does not matter to the script. Ensure it has executable permissions (`chmod +x /etc/ansible/terraform.py`).
 
-With your Ansible playbooks and Terraform configuration in the same directory, run Ansible with the `-i` flag to set the inventory source.
+With your Ansible playbook and Terraform configuration in the same directory, run Ansible with the `-i` flag to set the inventory source.
 
 ```
 $ ansible-playbook -i /etc/ansible/terraform.py playbook.yml
