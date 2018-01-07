@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.0.0] - 2018-01-07
 ### Added
 - Added `ANSIBLE_TF_DIR` environment variable to set Terraform configuration directory.
 
@@ -19,5 +21,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Update docs and package info for move back to GitHub.
 
-[Unreleased]: https://github.com/nbering/terraform-inventory/compare/v0.0.2...HEAD
+[Unreleased]: https://github.com/nbering/terraform-inventory/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/nbering/terraform-inventory/compare/v0.0.2...v1.0.0
 [0.0.2]: https://github.com/nbering/terraform-inventory/compare/v0.0.1...v0.0.2
