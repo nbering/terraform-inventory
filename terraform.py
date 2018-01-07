@@ -6,7 +6,8 @@ import re
 import subprocess
 import sys
 
-TERRAFORM_PATH = os.environ.get('TERRAFORM_PATH', 'terraform')
+TERRAFORM_PATH = os.environ.get('ANSIBLE_TF_BIN', 'terraform')
+TERRAFORM_DIR = os.environ.get('ANSIBLE_TF_DIR', os.getcwd())
 
 def _extract_dict(attrs, key):
     out = {}
@@ -70,7 +71,8 @@ def _walk_state(tfstate, inventory):
 
 def _main():
     try:
-        proc = subprocess.Popen([TERRAFORM_PATH, 'state', 'pull'], stdout=subprocess.PIPE)
+        tf_command = [TERRAFORM_PATH, 'state', 'pull', '-input=false']
+        proc = subprocess.Popen(tf_command, cwd=TERRAFORM_DIR, stdout=subprocess.PIPE)
         tfstate = json.load(proc.stdout)
         inventory = _walk_state(tfstate, _init_inventory())
         sys.stdout.write(json.dumps(inventory, indent=2))
