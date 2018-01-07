@@ -5,10 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-## Changed
-- Ported the script to Python to be more compatible with the Ansible ecosystem.
+### Added
+- Added `ANSIBLE_TF_DIR` environment variable to set Terraform configuration directory.
 
-## Deprecated
+### Changed
+- Ported the script to Python to be more compatible with the Ansible ecosystem.
+- Changed `TERRAFORM_PATH` environment variable to `ANSIBLE_TF_PATH`.
+
+### Deprecated
 - The earlier NodeJS implementation will not be supported going forward.
 
 ## [0.0.2] - 2018-01-06
