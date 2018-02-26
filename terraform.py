@@ -51,22 +51,27 @@ def _init_inventory():
         }
     }
 
+def _handle_host(attrs, inventory):
+    host_vars = _extract_dict(attrs, "vars")
+    groups = _extract_list(attrs, "groups")
+    hostname = attrs["inventory_hostname"]
+
+    if "all" not in groups:
+        groups.append("all")
+
+    _add_host(inventory, hostname, groups, host_vars)
+
 def _walk_state(tfstate, inventory):
     for module in tfstate["modules"]:
         for resource in module["resources"].values():
-            if resource["type"] != "ansible_host":
+            if not resource["type"].startswith("ansible_"):
                 continue
-            
+
             attrs = resource["primary"]["attributes"]
 
-            host_vars = _extract_dict(attrs, "vars")
-            groups = _extract_list(attrs, "groups")
-            hostname = attrs["inventory_hostname"]
+            if resource["type"] == "ansible_host":
+                _handle_host(attrs, inventory)
 
-            if "all" not in groups:
-                groups.append("all")
-
-            _add_host(inventory, hostname, groups, host_vars)
     return inventory
 
 def _main():
