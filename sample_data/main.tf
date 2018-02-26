@@ -15,3 +15,12 @@ resource "ansible_host" "db" {
         bar  = "ddd"
     }
 }
+
+resource "ansible_group" "web" {
+    inventory_group_name = "web"
+    children = ["foo", "bar", "baz"]
+    vars {
+        foo = "bar"
+        bar = 2
+    }
+}
