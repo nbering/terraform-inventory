@@ -24,3 +24,13 @@ resource "ansible_group" "web" {
         bar = 2
     }
 }
+
+# A host with no optional properties.
+resource "ansible_host" "base" {
+    inventory_hostname = "base.example.com"
+}
+
+# A group with no optional properties.
+resource "ansible_group" "base" {
+    inventory_group_name = "base"
+}
