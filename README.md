@@ -23,6 +23,11 @@ Override the path to the Terraform command executable. This is useful if you hav
 
 Set the working directory for the `terraform` command when the scripts shells out to it. This is useful if you keep your terraform and ansible configuration in separate directories. Defaults to using the current working directory.
 
+### ANSIBLE\_TF\_WS\_NAME
+
+Sets the workspace for the `terraform` command when the scripts shells out to it, defaults to `default` workspace - if you don't use workspaces this is the one you'll be using. 
+
+
 ## License
 
 Licensed for use under the [MIT License](./LICENSE).
