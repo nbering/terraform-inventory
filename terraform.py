@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#! /usr/bin/env python2
 
 import sys, json, os, re
 from subprocess import Popen, PIPE
@@ -97,7 +97,6 @@ def _walk_state(tfstate, inventory):
 
     return inventory
 
-#  COME BACK TO THIS
 def _execute_shell():
     encoding = 'utf-8'
     tf_workspace = [TERRAFORM_PATH, 'workspace', 'select', TERRAFORM_WS_NAME]
