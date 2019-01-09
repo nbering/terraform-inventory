@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.1.0] - 2019-01-09
 ### Added
-- Support for Terraform workspaces via `ANSIBLE_TF_WS_NAME` environment variable. Thanks [@dnitsch]
+- Support for Terraform workspaces via `ANSIBLE_TF_WS_NAME` environment variable. Thanks [@dnitsch]!
 
 ## [1.0.1] - 2018-02-25
 ### Added
