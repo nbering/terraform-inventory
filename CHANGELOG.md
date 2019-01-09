@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.1.0] - 2019-01-09
+### Added
+- Support for Terraform workspaces via `ANSIBLE_TF_WS_NAME` environment variable. Thanks [@dnitsch]
+
 ## [1.0.1] - 2018-02-25
 ### Added
 - Support for `ansible_group` resource, added in [nbering/terraform-provider-ansible#8](https://github.com/nbering/terraform-provider-ansible/pull/8)
@@ -25,7 +29,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Update docs and package info for move back to GitHub.
 
-[Unreleased]: https://github.com/nbering/terraform-inventory/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/nbering/terraform-inventory/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/nbering/terraform-inventory/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/nbering/terraform-inventory/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/nbering/terraform-inventory/compare/v0.0.2...v1.0.0
 [0.0.2]: https://github.com/nbering/terraform-inventory/compare/v0.0.1...v0.0.2
+
+[@dnitsch]:https://github.com/dnitsch
