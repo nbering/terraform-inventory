@@ -1,13 +1,11 @@
 #! /usr/bin/env python2
 
-import json
-import os
-import re
-import subprocess
-import sys
+import sys, json, os, re
+from subprocess import Popen, PIPE
 
 TERRAFORM_PATH = os.environ.get('ANSIBLE_TF_BIN', 'terraform')
 TERRAFORM_DIR = os.environ.get('ANSIBLE_TF_DIR', os.getcwd())
+TERRAFORM_WS_NAME = os.environ.get('ANSIBLE_TF_WS_NAME', 'default')
 
 def _extract_dict(attrs, key):
     out = {}
@@ -99,14 +97,31 @@ def _walk_state(tfstate, inventory):
 
     return inventory
 
+def _execute_shell():
+    encoding = 'utf-8'
+    tf_workspace = [TERRAFORM_PATH, 'workspace', 'select', TERRAFORM_WS_NAME]
+    proc_ws = Popen(tf_workspace, cwd=TERRAFORM_DIR, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    out_ws, err_ws = proc_ws.communicate()
+    if err_ws != '':
+        sys.stderr.write(str(err_ws)+'\n')
+        sys.exit(1)
+    else:
+        tf_command = [TERRAFORM_PATH, 'state', 'pull', '-input=false']
+        proc_tf_cmd = Popen(tf_command, cwd=TERRAFORM_DIR, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+        out_cmd, err_cmd = proc_tf_cmd.communicate()
+        if err_cmd != '':
+            sys.stderr.write(str(err_cmd)+'\n')
+            sys.exit(1)
+        else:
+            return json.loads(out_cmd, encoding='utf-8')
+
 def _main():
     try:
-        tf_command = [TERRAFORM_PATH, 'state', 'pull', '-input=false']
-        proc = subprocess.Popen(tf_command, cwd=TERRAFORM_DIR, stdout=subprocess.PIPE)
-        tfstate = json.load(proc.stdout)
+        tfstate = _execute_shell()
         inventory = _walk_state(tfstate, _init_inventory())
         sys.stdout.write(json.dumps(inventory, indent=2))
-    except:
+    except Exception as e:
+        sys.stderr.write(str(e)+'\n')
         sys.exit(1)
 
 if __name__ == '__main__':
