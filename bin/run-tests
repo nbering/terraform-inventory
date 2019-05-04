@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -eu
+
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+
+find "${PROJECT_ROOT}/sample_data" -type d -depth 2 -print0 \
+  | xargs -0 -n1 ${PROJECT_ROOT}/bin/test-inventory-script

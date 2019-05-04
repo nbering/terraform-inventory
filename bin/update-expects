@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+export ANSIBLE_TF_BIN="${PROJECT_ROOT}/bin/fake-terraform"
+
+find "${PROJECT_ROOT}/sample_data" -type d -depth 2 \
+    -exec bash -c "ANSIBLE_TF_DIR=\"{}\" \"${PROJECT_ROOT}/terraform.py\" > {}/expect.json" \;

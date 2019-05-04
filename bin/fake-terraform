@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if [ "$*" == "state pull" ]; then
+    cat ./terraform.tfstate 2>/dev/null
+fi
