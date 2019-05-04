@@ -1,0 +1,22 @@
+{
+  "all": {
+    "hosts": [
+      "broad-union.example.com",
+      "young-violet.example.com",
+      "lively-tree.example.com",
+      "mute-fog.example.com",
+      "rough-bread.example.com"
+    ],
+    "vars": {},
+    "children": []
+  },
+  "_meta": {
+    "hostvars": {
+      "broad-union.example.com": {},
+      "young-violet.example.com": {},
+      "lively-tree.example.com": {},
+      "mute-fog.example.com": {},
+      "rough-bread.example.com": {}
+    }
+  }
+}
