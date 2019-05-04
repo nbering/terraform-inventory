@@ -1,11 +1,15 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python3
 
-import sys, json, os, re
+import sys
+import json
+import os
+import re
 from subprocess import Popen, PIPE
 
 TERRAFORM_PATH = os.environ.get('ANSIBLE_TF_BIN', 'terraform')
 TERRAFORM_DIR = os.environ.get('ANSIBLE_TF_DIR', os.getcwd())
 TERRAFORM_WS_NAME = os.environ.get('ANSIBLE_TF_WS_NAME', 'default')
+
 
 def _extract_dict(attrs, key):
     out = {}
@@ -16,6 +20,7 @@ def _extract_dict(attrs, key):
 
         out[match.group(1)] = attrs[k]
     return out
+
 
 def _extract_list(attrs, key):
     out = []
@@ -33,6 +38,7 @@ def _extract_list(attrs, key):
 
     return out
 
+
 def _init_group(children=None, hosts=None, vars=None):
     return {
         "hosts": [] if hosts is None else hosts,
@@ -40,13 +46,24 @@ def _init_group(children=None, hosts=None, vars=None):
         "children": [] if children is None else children
     }
 
+
 def _add_host(inventory, hostname, groups, host_vars):
+    if host_vars is None:
+        host_vars = {}
+    if groups is None:
+        groups = []
+
+    if "all" not in groups:
+        groups.append("all")
+
     inventory["_meta"]["hostvars"][hostname] = host_vars
+
     for group in groups:
         if group not in inventory.keys():
             inventory[group] = _init_group(hosts=[hostname])
         elif hostname not in inventory[group]:
             inventory[group]["hosts"].append(hostname)
+
 
 def _add_group(inventory, group_name, children, group_vars):
     if group_name not in inventory.keys():
@@ -57,6 +74,7 @@ def _add_group(inventory, group_name, children, group_vars):
         inventory[group_name]["children"] = children
         inventory[group_name]["vars"] = group_vars
 
+
 def _init_inventory():
     return {
         "all": _init_group(),
@@ -65,15 +83,14 @@ def _init_inventory():
         }
     }
 
+
 def _handle_host(attrs, inventory):
     host_vars = _extract_dict(attrs, "vars")
     groups = _extract_list(attrs, "groups")
     hostname = attrs["inventory_hostname"]
 
-    if "all" not in groups:
-        groups.append("all")
-
     _add_host(inventory, hostname, groups, host_vars)
+
 
 def _handle_group(attrs, inventory):
     group_vars = _extract_dict(attrs, "vars")
@@ -82,38 +99,60 @@ def _handle_group(attrs, inventory):
 
     _add_group(inventory, group_name, children, group_vars)
 
+
 def _walk_state(tfstate, inventory):
-    for module in tfstate["modules"]:
-        for resource in module["resources"].values():
-            if not resource["type"].startswith("ansible_"):
+    if "modules" in tfstate:
+        # handle Terraform < 0.12
+        for module in tfstate["modules"]:
+            for resource in module["resources"].values():
+                if not resource["type"].startswith("ansible_"):
+                    continue
+
+                attrs = resource["primary"]["attributes"]
+
+                if resource["type"] == "ansible_host":
+                    _handle_host(attrs, inventory)
+                if resource["type"] == "ansible_group":
+                    _handle_group(attrs, inventory)
+    else:
+        # handle Terraform >= 0.12
+        for resource in tfstate["resources"]:
+            if resource["provider"] != "provider.ansible":
                 continue
 
-            attrs = resource["primary"]["attributes"]
+            for instance in resource["instances"]:
+                attrs = instance["attributes"]
 
-            if resource["type"] == "ansible_host":
-                _handle_host(attrs, inventory)
-            if resource["type"] == "ansible_group":
-                _handle_group(attrs, inventory)
+                if resource["type"] == "ansible_group":
+                    _add_group(
+                        inventory, attrs["inventory_group_name"], attrs["children"], attrs["vars"])
+                elif resource["type"] == "ansible_host":
+                    _add_host(
+                        inventory, attrs["inventory_hostname"], attrs["groups"], attrs["vars"])
 
     return inventory
+
 
 def _execute_shell():
     encoding = 'utf-8'
     tf_workspace = [TERRAFORM_PATH, 'workspace', 'select', TERRAFORM_WS_NAME]
-    proc_ws = Popen(tf_workspace, cwd=TERRAFORM_DIR, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    proc_ws = Popen(tf_workspace, cwd=TERRAFORM_DIR, stdout=PIPE,
+                    stderr=PIPE, universal_newlines=True)
     out_ws, err_ws = proc_ws.communicate()
     if err_ws != '':
         sys.stderr.write(str(err_ws)+'\n')
         sys.exit(1)
     else:
-        tf_command = [TERRAFORM_PATH, 'state', 'pull', '-input=false']
-        proc_tf_cmd = Popen(tf_command, cwd=TERRAFORM_DIR, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+        tf_command = [TERRAFORM_PATH, 'state', 'pull']
+        proc_tf_cmd = Popen(tf_command, cwd=TERRAFORM_DIR,
+                            stdout=PIPE, stderr=PIPE, universal_newlines=True)
         out_cmd, err_cmd = proc_tf_cmd.communicate()
         if err_cmd != '':
             sys.stderr.write(str(err_cmd)+'\n')
             sys.exit(1)
         else:
             return json.loads(out_cmd, encoding='utf-8')
+
 
 def _main():
     try:
@@ -123,6 +162,7 @@ def _main():
     except Exception as e:
         sys.stderr.write(str(e)+'\n')
         sys.exit(1)
+
 
 if __name__ == '__main__':
     _main()
