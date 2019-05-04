@@ -1,13 +1,4 @@
 {
-  "all": {
-    "hosts": [
-      "base.example.com",
-      "db.example.com",
-      "www.example.com"
-    ],
-    "vars": {},
-    "children": []
-  },
   "_meta": {
     "hostvars": {
       "base.example.com": {},
@@ -21,38 +12,47 @@
       }
     }
   },
+  "all": {
+    "children": [],
+    "hosts": [
+      "www.example.com",
+      "base.example.com",
+      "db.example.com"
+    ],
+    "vars": {}
+  },
   "base": {
+    "children": [],
     "hosts": [],
-    "vars": {},
-    "children": []
+    "vars": {}
+  },
+  "db": {
+    "children": [],
+    "hosts": [
+      "db.example.com"
+    ],
+    "vars": {}
+  },
+  "example": {
+    "children": [],
+    "hosts": [
+      "www.example.com",
+      "db.example.com"
+    ],
+    "vars": {}
   },
   "web": {
+    "children": [
+      "foo",
+      "bar",
+      "baz"
+    ],
     "hosts": [
       "www.example.com"
     ],
     "vars": {
       "bar": "2",
       "foo": "bar"
-    },
-    "children": [
-      "foo",
-      "bar",
-      "baz"
-    ]
-  },
-  "example": {
-    "hosts": [
-      "db.example.com",
-      "www.example.com"
-    ],
-    "vars": {},
-    "children": []
-  },
-  "db": {
-    "hosts": [
-      "db.example.com"
-    ],
-    "vars": {},
-    "children": []
+    }
   }
 }

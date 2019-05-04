@@ -1,15 +1,4 @@
 {
-  "all": {
-    "hosts": [
-      "count-sample-0.example.com",
-      "count-sample-1.example.com",
-      "count-sample-2.example.com",
-      "count-sample-3.example.com",
-      "count-sample-4.example.com"
-    ],
-    "vars": {},
-    "children": []
-  },
   "_meta": {
     "hostvars": {
       "count-sample-0.example.com": {},
@@ -18,5 +7,16 @@
       "count-sample-3.example.com": {},
       "count-sample-4.example.com": {}
     }
+  },
+  "all": {
+    "children": [],
+    "hosts": [
+      "count-sample-4.example.com",
+      "count-sample-2.example.com",
+      "count-sample-3.example.com",
+      "count-sample-0.example.com",
+      "count-sample-1.example.com"
+    ],
+    "vars": {}
   }
 }

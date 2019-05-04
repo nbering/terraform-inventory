@@ -1,5 +1,15 @@
 {
+  "_meta": {
+    "hostvars": {
+      "broad-union.example.com": {},
+      "lively-tree.example.com": {},
+      "mute-fog.example.com": {},
+      "rough-bread.example.com": {},
+      "young-violet.example.com": {}
+    }
+  },
   "all": {
+    "children": [],
     "hosts": [
       "broad-union.example.com",
       "young-violet.example.com",
@@ -7,16 +17,6 @@
       "mute-fog.example.com",
       "rough-bread.example.com"
     ],
-    "vars": {},
-    "children": []
-  },
-  "_meta": {
-    "hostvars": {
-      "broad-union.example.com": {},
-      "young-violet.example.com": {},
-      "lively-tree.example.com": {},
-      "mute-fog.example.com": {},
-      "rough-bread.example.com": {}
-    }
+    "vars": {}
   }
 }

@@ -21,7 +21,7 @@ PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 export ANSIBLE_TF_BIN="${PROJECT_ROOT}/bin/fake-terraform"
 export ANSIBLE_TF_DIR="$1"
 
-"${PROJECT_ROOT}/terraform.py" | diff "${ANSIBLE_TF_DIR}/expect.json" - \
+"${PROJECT_ROOT}/terraform.py" | jq -S | diff "${ANSIBLE_TF_DIR}/expect.json" - \
   > /dev/null 2> /dev/null
 
 if [ ! "$?" -eq 0 ]; then
