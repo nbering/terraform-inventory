@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.0.0] - 2019-05-05
+### Added
+- Support for Terraform 0.12's new state file structure
+- Simple regression testing with Bash scripts
+
+### Changed
+- Removed version-specific python shebang, as `terraform.py` seems to work fine with Python 2.7 and 3.x
+
+### Removed
+- `terraform state pull` no longer uses `-input=false` as this argument is not recognized by Terraform 0.12
+
 ## [1.1.0] - 2019-01-09
 ### Added
 - Support for Terraform workspaces via `ANSIBLE_TF_WS_NAME` environment variable. Thanks [@dnitsch]!
@@ -29,7 +40,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Update docs and package info for move back to GitHub.
 
-[Unreleased]: https://github.com/nbering/terraform-inventory/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/nbering/terraform-inventory/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/nbering/terraform-inventory/compare/v1.1.0...v2.0.0
 [1.1.0]: https://github.com/nbering/terraform-inventory/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/nbering/terraform-inventory/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/nbering/terraform-inventory/compare/v0.0.2...v1.0.0
