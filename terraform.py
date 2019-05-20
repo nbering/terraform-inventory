@@ -56,12 +56,17 @@ def _add_host(inventory, hostname, groups, host_vars):
     if "all" not in groups:
         groups.append("all")
 
-    inventory["_meta"]["hostvars"][hostname] = host_vars
+    if not hostname in inventory["_meta"]["hostvars"]:
+        # make a copy because subsequent calls are going to mutate the instance
+        inventory["_meta"]["hostvars"][hostname] = host_vars.copy()
+    else:
+        inventory["_meta"]["hostvars"][hostname].update(host_vars)
+
 
     for group in groups:
         if group not in inventory.keys():
             inventory[group] = _init_group(hosts=[hostname])
-        elif hostname not in inventory[group]:
+        elif hostname not in inventory[group]["hosts"]:
             inventory[group]["hosts"].append(hostname)
 
 
@@ -92,6 +97,12 @@ def _handle_host(attrs, inventory):
     _add_host(inventory, hostname, groups, host_vars)
 
 
+def _handle_host_var(attrs, inventory):
+    host_vars = {attrs["key"]: attrs["value"]}
+    hostname = attrs["inventory_hostname"]
+
+    _add_host(inventory, hostname, None, host_vars)
+
 def _handle_group(attrs, inventory):
     group_vars = _extract_dict(attrs, "vars")
     children = _extract_list(attrs, "children")
@@ -112,8 +123,10 @@ def _walk_state(tfstate, inventory):
 
                 if resource["type"] == "ansible_host":
                     _handle_host(attrs, inventory)
-                if resource["type"] == "ansible_group":
+                elif resource["type"] == "ansible_group":
                     _handle_group(attrs, inventory)
+                elif resource["type"] == "ansible_host_var":
+                    _handle_host_var(attrs, inventory)
     else:
         # handle Terraform >= 0.12
         for resource in tfstate["resources"]:
@@ -129,6 +142,9 @@ def _walk_state(tfstate, inventory):
                 elif resource["type"] == "ansible_host":
                     _add_host(
                         inventory, attrs["inventory_hostname"], attrs["groups"], attrs["vars"])
+                elif resource["type"] == "ansible_host_var":
+                    _add_host(
+                        inventory, attrs["inventory_hostname"], None, {attrs["key"]: attrs["value"]})
 
     return inventory
 
