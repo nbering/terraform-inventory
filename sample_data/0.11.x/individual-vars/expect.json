@@ -15,8 +15,8 @@
   "all": {
     "children": [],
     "hosts": [
-      "db.example.com",
-      "www.example.com"
+      "www.example.com",
+      "db.example.com"
     ],
     "vars": {}
   },
@@ -32,8 +32,8 @@
   "example": {
     "children": [],
     "hosts": [
-      "db.example.com",
-      "www.example.com"
+      "www.example.com",
+      "db.example.com"
     ],
     "vars": {}
   },
