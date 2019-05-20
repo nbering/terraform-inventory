@@ -71,6 +71,8 @@ def _add_host(inventory, hostname, groups, host_vars):
 
 
 def _add_group(inventory, group_name, children, group_vars):
+    if children is None:
+        children = []
     if group_name not in inventory.keys():
         inventory[group_name] = _init_group(children=children, vars=group_vars)
     else:
