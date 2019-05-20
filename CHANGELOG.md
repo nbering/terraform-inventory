@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Support for `ansible_host_var` resource type
+- Support for `ansible_group_var` resource type
+
+### Fixed
+- Corrected a minor issue where `ansible_host` or `ansible_host_var` resources with the same `inventory_hostname` would result in multiple copies of the hostname in any groups they shared in common (including the "all" group)
 
 ## [2.0.0] - 2019-05-05
 ### Added
