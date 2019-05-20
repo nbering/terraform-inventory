@@ -1,0 +1,47 @@
+{
+  "_meta": {
+    "hostvars": {
+      "db.example.com": {
+        "bar": "ddd",
+        "foo": "ccc"
+      },
+      "www.example.com": {
+        "bar": "bbb",
+        "db_host": "db.example.com",
+        "foo": "aaa"
+      }
+    }
+  },
+  "all": {
+    "children": [],
+    "hosts": [
+      "www.example.com",
+      "db.example.com"
+    ],
+    "vars": {}
+  },
+  "db": {
+    "children": [],
+    "hosts": [
+      "db.example.com"
+    ],
+    "vars": {
+      "ansible_user": "postgres"
+    }
+  },
+  "example": {
+    "children": [],
+    "hosts": [
+      "www.example.com",
+      "db.example.com"
+    ],
+    "vars": {}
+  },
+  "web": {
+    "children": [],
+    "hosts": [
+      "www.example.com"
+    ],
+    "vars": {}
+  }
+}
