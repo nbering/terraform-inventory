@@ -25,7 +25,9 @@
     "hosts": [
       "db.example.com"
     ],
-    "vars": {}
+    "vars": {
+      "ansible_user": "postgres"
+    }
   },
   "example": {
     "children": [],

@@ -21,3 +21,9 @@ resource "ansible_host_var" "extra" {
   key                = "db_host"
   value              = "${ansible_host.db.inventory_hostname}"
 }
+
+resource "ansible_group_var" "extra" {
+  inventory_group_name = "db"
+  key                  = "ansible_user"
+  value                = "postgres"
+}
