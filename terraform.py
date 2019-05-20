@@ -103,6 +103,12 @@ def _handle_host_var(attrs, inventory):
 
     _add_host(inventory, hostname, None, host_vars)
 
+def _handle_group_var(attrs, inventory):
+    group_vars = {attrs["key"]: attrs["value"]}
+    group_name = attrs["inventory_group_name"]
+
+    _add_group(inventory, group_name, None, group_vars)
+
 def _handle_group(attrs, inventory):
     group_vars = _extract_dict(attrs, "vars")
     children = _extract_list(attrs, "children")
@@ -125,6 +131,8 @@ def _walk_state(tfstate, inventory):
                     _handle_host(attrs, inventory)
                 elif resource["type"] == "ansible_group":
                     _handle_group(attrs, inventory)
+                elif resource["type"] == "ansible_group_var":
+                    _handle_group_var(attrs, inventory)
                 elif resource["type"] == "ansible_host_var":
                     _handle_host_var(attrs, inventory)
     else:
@@ -139,6 +147,9 @@ def _walk_state(tfstate, inventory):
                 if resource["type"] == "ansible_group":
                     _add_group(
                         inventory, attrs["inventory_group_name"], attrs["children"], attrs["vars"])
+                elif resource["type"] == "ansible_group_var":
+                    _add_group(
+                        inventory, attrs["inventory_group_name"], None, {attrs["key"]: attrs["value"]})
                 elif resource["type"] == "ansible_host":
                     _add_host(
                         inventory, attrs["inventory_hostname"], attrs["groups"], attrs["vars"])
