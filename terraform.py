@@ -11,6 +11,7 @@ TERRAFORM_PATH = os.environ.get('ANSIBLE_TF_BIN', 'terraform')
 TERRAFORM_DIR = os.environ.get('ANSIBLE_TF_DIR', os.getcwd())
 TERRAFORM_WS_NAME = os.environ.get('ANSIBLE_TF_WS_NAME', 'default')
 
+
 class TerraformState:
     def __init__(self, state_json):
         self.ansible_resources = []
@@ -34,7 +35,8 @@ class TerraformState:
                     self.ansible_resources.append(tf_resource)
             else:
                 for instance in resource["instances"]:
-                    tf_resource = TerraformResource(instance, type=resource["type"])
+                    tf_resource = TerraformResource(
+                        instance, type=resource["type"])
                     if tf_resource.is_ansible():
                         self.ansible_resources.append(tf_resource)
 
@@ -45,16 +47,13 @@ class TerraformResource:
         self._type = type
         self.source_json = source_json
 
-
     def is_ansible(self):
         return self.type().startswith("ansible_")
-
 
     def type(self):
         if self._type:
             return self._type
         return self.source_json["type"]
-
 
     def read_dict_attr(self, key):
         attrs = self._raw_attributes()
@@ -119,9 +118,11 @@ class AnsibleInventory:
 
     def update_groups(self, groupname, children=None, hosts=None, group_vars=None):
         if groupname in self.groups:
-            self.groups[groupname].update(children=children, hosts=hosts, group_vars=group_vars)
+            self.groups[groupname].update(
+                children=children, hosts=hosts, group_vars=group_vars)
         else:
-            self.groups[groupname] = AnsibleGroup(groupname, children=children, hosts=hosts, group_vars=group_vars)
+            self.groups[groupname] = AnsibleGroup(
+                groupname, children=children, hosts=hosts, group_vars=group_vars)
 
     def add_host_resource(self, resource):
         hostname = resource.read_attr("inventory_hostname")
@@ -202,6 +203,7 @@ class AnsibleHost:
 
     def get_vars(self):
         return dict(self.host_vars)
+
 
 class AnsibleGroup:
     def __init__(self, groupname, children=None, hosts=None, group_vars=None):
