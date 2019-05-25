@@ -264,7 +264,7 @@ def _main():
             inventory.add_resource(resource)
 
         sys.stdout.write(json.dumps(inventory.to_dict(), indent=2))
-    except Exception as e:
+    except Exception:
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
