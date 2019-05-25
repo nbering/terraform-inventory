@@ -11,11 +11,11 @@
   "all": {
     "children": [],
     "hosts": [
-      "rough-bread.example.com",
       "broad-union.example.com",
-      "young-violet.example.com",
       "lively-tree.example.com",
-      "mute-fog.example.com"
+      "mute-fog.example.com",
+      "rough-bread.example.com",
+      "young-violet.example.com"
     ],
     "vars": {}
   }

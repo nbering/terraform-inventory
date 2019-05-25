@@ -12,10 +12,10 @@
     "children": [],
     "hosts": [
       "broad-union.example.com",
-      "young-violet.example.com",
       "lively-tree.example.com",
       "mute-fog.example.com",
-      "rough-bread.example.com"
+      "rough-bread.example.com",
+      "young-violet.example.com"
     ],
     "vars": {}
   }

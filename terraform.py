@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import bisect
 import sys
 import json
 import os
@@ -40,10 +41,17 @@ def _extract_list(attrs, key):
 
 
 def _init_group(children=None, hosts=None, vars=None):
+    if children is None:
+        children = []
+    if hosts is None:
+        hosts = []
+    if vars is None:
+        vars = {}
+
     return {
-        "hosts": [] if hosts is None else hosts,
-        "vars": {} if vars is None else vars,
-        "children": [] if children is None else children
+        "hosts": sorted(hosts),
+        "vars": vars,
+        "children": sorted(children)
     }
 
 
@@ -67,7 +75,7 @@ def _add_host(inventory, hostname, groups, host_vars):
         if group not in inventory.keys():
             inventory[group] = _init_group(hosts=[hostname])
         elif hostname not in inventory[group]["hosts"]:
-            inventory[group]["hosts"].append(hostname)
+            bisect.insort(inventory[group]["hosts"], hostname)
 
 
 def _add_group(inventory, group_name, children, group_vars):
@@ -78,7 +86,7 @@ def _add_group(inventory, group_name, children, group_vars):
     else:
         # Start out with support for only one "group" with a given name
         # If there's a second group by the name, last in wins
-        inventory[group_name]["children"] = children
+        inventory[group_name]["children"] = sorted(children)
         inventory[group_name]["vars"] = group_vars
 
 

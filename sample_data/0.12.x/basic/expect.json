@@ -43,9 +43,9 @@
   },
   "web": {
     "children": [
-      "foo",
       "bar",
-      "baz"
+      "baz",
+      "foo"
     ],
     "hosts": [
       "www.example.com"
