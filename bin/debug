@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -u
+set -o pipefail
+
+# Assert test case argument received.
+if [ ! "$#" -eq "1" ]; then
+    echo "ERROR: Expected exactly 1 argument, got $#."
+    echo "Script expects path to test case."
+    exit 1
+fi
+
+# Assert expect file exists.
+if [ ! -f "$1/expect.json" ]; then
+    echo "ERROR: Missing expectation file: $1/expect.json"
+    exit 1
+fi
+
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+
+export ANSIBLE_TF_BIN="${PROJECT_ROOT}/bin/fake-terraform"
+export ANSIBLE_TF_DIR="$1"
+
+set -e
+
+"${PROJECT_ROOT}/terraform.py" | jq -S | diff -y "${ANSIBLE_TF_DIR}/expect.json" -
