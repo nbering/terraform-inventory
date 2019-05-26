@@ -234,7 +234,7 @@ def _execute_shell():
     tf_workspace = [TERRAFORM_PATH, 'workspace', 'select', TERRAFORM_WS_NAME]
     proc_ws = Popen(tf_workspace, cwd=TERRAFORM_DIR, stdout=PIPE,
                     stderr=PIPE, universal_newlines=True)
-    out_ws, err_ws = proc_ws.communicate()
+    _, err_ws = proc_ws.communicate()
     if err_ws != '':
         sys.stderr.write(str(err_ws)+'\n')
         sys.exit(1)
@@ -247,7 +247,7 @@ def _execute_shell():
             sys.stderr.write(str(err_cmd)+'\n')
             sys.exit(1)
         else:
-            return json.loads(out_cmd, encoding='utf-8')
+            return json.loads(out_cmd, encoding=encoding)
 
 
 def _main():
