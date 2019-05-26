@@ -8,7 +8,7 @@
       "www.example.com": {
         "bar": "bbb",
         "db_host": "db.example.com",
-        "foo": "aaa"
+        "foo": "eee"
       }
     }
   },

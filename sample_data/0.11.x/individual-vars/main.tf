@@ -32,6 +32,12 @@ resource "ansible_host_var" "extra" {
   value              = "${ansible_host.db.inventory_hostname}"
 }
 
+resource "ansible_host_var" "override" {
+  inventory_hostname = "www.example.com"
+  key                = "foo"
+  value              = "eee"
+}
+
 resource "ansible_group_var" "extra" {
   inventory_group_name = "db"
   key                  = "ansible_user"
