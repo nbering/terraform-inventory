@@ -107,8 +107,8 @@ class TerraformResource(object):
 
         priority = 0
 
-        if self.read_int_attr("priority") is not None:
-            priority = self.read_int_attr("priority")
+        if self.read_int_attr("variable_priority") is not None:
+            priority = self.read_int_attr("variable_priority")
         elif self.type() in TerraformResource.DEFAULT_PRIORITIES:
             priority = TerraformResource.DEFAULT_PRIORITIES[self.type()]
 
