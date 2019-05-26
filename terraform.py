@@ -82,14 +82,38 @@ class TerraformResource(object):
     methods for reading older-style dictionary and list values from attributes
     defined as a single-level map.
     '''
+    DEFAULT_PRIORITIES = {
+        'ansible_host': 50,
+        'ansible_group': 50,
+        'ansible_host_var': 60,
+        'ansible_group_var': 60
+    }
+
     def __init__(self, source_json, flat_attrs=False, resource_type=None):
         self.flat_attrs = flat_attrs
         self._type = resource_type
+        self._priority = None
         self.source_json = source_json
 
     def is_ansible(self):
         '''Check if the resource is provided by the ansible provider.'''
         return self.type().startswith("ansible_")
+
+    def priority(self):
+        '''Get the merge priority of the resource.'''
+        if self._priority is not None:
+            return self._priority
+
+        priority = 0
+
+        if self.read_attr("priority") is not None:
+            priority = self.read_attr("priority")
+        elif self.type() in TerraformResource.DEFAULT_PRIORITIES:
+            priority = TerraformResource.DEFAULT_PRIORITIES[self.type()]
+
+        self._priority = priority
+
+        return self._priority
 
     def type(self):
         '''Returns the Terraform resource type identifier.'''
@@ -163,18 +187,16 @@ class AnsibleInventory(object):
         self.hosts = {}
         self.inner_json = {}
 
-    def update_hosts(self, hostname, groups=None, host_vars=None):
+    def add_host_resource(self, resource):
         '''Upsert type action for host resources.'''
+        hostname = resource.read_attr("inventory_hostname")
+
         if hostname in self.hosts:
             host = self.hosts[hostname]
-            host.update(groups=groups, host_vars=host_vars)
+            host.add_source(resource)
         else:
-            host = AnsibleHost(hostname, groups=groups, host_vars=host_vars)
+            host = AnsibleHost(hostname, source=resource)
             self.hosts[hostname] = host
-
-        if host.groups:
-            for groupname in host.groups:
-                self.update_groups(groupname, hosts=[hostname])
 
     def update_groups(self, groupname, children=None, hosts=None, group_vars=None):
         '''Upsert type action for group resources'''
@@ -184,24 +206,6 @@ class AnsibleInventory(object):
         else:
             self.groups[groupname] = AnsibleGroup(
                 groupname, children=children, hosts=hosts, group_vars=group_vars)
-
-    def add_host_resource(self, resource):
-        '''Convert from Terraform ansible_host resource.'''
-        hostname = resource.read_attr("inventory_hostname")
-        groups = resource.read_list_attr("groups")
-        host_vars = resource.read_dict_attr("vars")
-
-        self.update_hosts(hostname, groups=groups, host_vars=host_vars)
-
-    def add_host_var_resource(self, resource):
-        '''Convert from Terraform ansible_host_var resource.'''
-        hostname = resource.read_attr("inventory_hostname")
-        key = resource.read_attr("key")
-        value = resource.read_attr("value")
-
-        host_vars = {key: value}
-
-        self.update_hosts(hostname, host_vars=host_vars)
 
     def add_group_resource(self, resource):
         '''Convert from Terraform ansible_group resource.'''
@@ -226,10 +230,8 @@ class AnsibleInventory(object):
         Process a Terraform resource, passing to the correct handler function
         by type.
         '''
-        if resource.type() == "ansible_host":
+        if resource.type().startswith("ansible_host"):
             self.add_host_resource(resource)
-        elif resource.type() == "ansible_host_var":
-            self.add_host_var_resource(resource)
         elif resource.type() == "ansible_group":
             self.add_group_resource(resource)
         elif resource.type() == "ansible_group_var":
@@ -247,7 +249,9 @@ class AnsibleInventory(object):
         }
 
         for hostname, host in self.hosts.items():
-            host.tidy()
+            host.build()
+            for group in host.groups:
+                self.update_groups(group, hosts=[host.hostname])
             out["_meta"]["hostvars"][hostname] = host.get_vars()
 
         for groupname, group in self.groups.items():
@@ -261,12 +265,14 @@ class AnsibleHost(object):
     '''
     AnsibleHost represents a host for the Ansible inventory.
     '''
-    def __init__(self, hostname, groups=None, host_vars=None):
+    def __init__(self, hostname, source=None):
+        self.sources = []
         self.hostname = hostname
         self.groups = set(["all"])
         self.host_vars = {}
 
-        self.update(groups=groups, host_vars=host_vars)
+        if source:
+            self.add_source(source)
 
     def update(self, groups=None, host_vars=None):
         '''Update host resource with additional groups and vars.'''
@@ -275,8 +281,23 @@ class AnsibleHost(object):
         if groups:
             self.groups.update(groups)
 
-    def tidy(self):
-        '''Normalize host contents.'''
+    def add_source(self, source):
+        '''Add a Terraform resource to the sources list.'''
+        self.sources.append(source)
+
+    def build(self):
+        '''Assemble host details from registered sources.'''
+        self.sources.sort(key=lambda source: source.priority())
+        for source in self.sources:
+            if source.type() == "ansible_host":
+                groups = source.read_list_attr("groups")
+                host_vars = source.read_dict_attr("vars")
+
+                self.update(groups=groups, host_vars=host_vars)
+            elif source.type() == "ansible_host_var":
+                host_vars = {source.read_attr("key"): source.read_attr("value")}
+
+                self.update(host_vars=host_vars)
         self.groups = sorted(self.groups)
 
     def get_vars(self):
