@@ -14,31 +14,26 @@ TERRAFORM_WS_NAME = os.environ.get('ANSIBLE_TF_WS_NAME', 'default')
 
 class TerraformState:
     def __init__(self, state_json):
-        self.ansible_resources = []
+        self.state_json = state_json
 
         if "modules" in state_json:
             # uses pre-0.12
             self.flat_attrs = True
-
-            for module in state_json["modules"]:
-                self._filter_resources(module["resources"].values())
         else:
             # state format for 0.12+
             self.flat_attrs = False
-            self._filter_resources(state_json["resources"])
 
-    def _filter_resources(self, resources):
-        for resource in resources:
-            if self.flat_attrs:
-                tf_resource = TerraformResource(resource, flat_attrs=True)
-                if tf_resource.is_ansible():
-                    self.ansible_resources.append(tf_resource)
-            else:
+    def resources(self):
+        if self.flat_attrs:
+            modules = self.state_json["modules"]
+            for module in modules:
+                for resource in module["resources"].values():
+                    yield TerraformResource(resource, flat_attrs=True)
+        else:
+            resources = self.state_json["resources"]
+            for resource in resources:
                 for instance in resource["instances"]:
-                    tf_resource = TerraformResource(
-                        instance, type=resource["type"])
-                    if tf_resource.is_ansible():
-                        self.ansible_resources.append(tf_resource)
+                    yield TerraformResource(instance, type=resource["type"])
 
 
 class TerraformResource:
@@ -260,8 +255,9 @@ def _main():
         tfstate = TerraformState(_execute_shell())
         inventory = AnsibleInventory()
 
-        for resource in tfstate.ansible_resources:
-            inventory.add_resource(resource)
+        for resource in tfstate.resources():
+            if resource.is_ansible():
+                inventory.add_resource(resource)
 
         sys.stdout.write(json.dumps(inventory.to_dict(), indent=2))
     except Exception:
