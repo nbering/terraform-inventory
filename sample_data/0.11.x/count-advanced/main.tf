@@ -1,3 +1,11 @@
+terraform {
+  required_version = "~> 0.11.0"
+}
+
+provider "ansible" {
+  version = "~> 0.0.5"
+}
+
 variable "hostnames" {
   type = "list"
 
