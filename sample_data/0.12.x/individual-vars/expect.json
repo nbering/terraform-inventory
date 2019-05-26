@@ -38,10 +38,17 @@
     "vars": {}
   },
   "web": {
-    "children": [],
+    "children": [
+      "bar",
+      "baz",
+      "foo"
+    ],
     "hosts": [
       "www.example.com"
     ],
-    "vars": {}
+    "vars": {
+      "bar": "2",
+      "foo": "fff"
+    }
   }
 }

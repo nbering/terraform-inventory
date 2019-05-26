@@ -38,6 +38,22 @@ resource "ansible_host_var" "override" {
   value              = "eee"
 }
 
+resource "ansible_group" "web" {
+  inventory_group_name = "web"
+  children             = ["foo", "bar", "baz"]
+
+  vars = {
+    foo = "bar"
+    bar = 2
+  }
+}
+
+resource "ansible_group_var" "override" {
+  inventory_group_name = "web"
+  key                  = "foo"
+  value                = "fff"
+}
+
 resource "ansible_group_var" "extra" {
   inventory_group_name = "db"
   key                  = "ansible_user"
