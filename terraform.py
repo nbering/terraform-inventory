@@ -47,7 +47,7 @@ TERRAFORM_DIR = os.environ.get('ANSIBLE_TF_DIR', os.getcwd())
 TERRAFORM_WS_NAME = os.environ.get('ANSIBLE_TF_WS_NAME', 'default')
 
 
-class TerraformState:
+class TerraformState(object):
     def __init__(self, state_json):
         self.state_json = state_json
 
@@ -71,7 +71,7 @@ class TerraformState:
                     yield TerraformResource(instance, type=resource["type"])
 
 
-class TerraformResource:
+class TerraformResource(object):
     def __init__(self, source_json, flat_attrs=False, type=None):
         self.flat_attrs = flat_attrs
         self._type = type
@@ -128,7 +128,7 @@ class TerraformResource:
         return self.source_json["attributes"]
 
 
-class AnsibleInventory:
+class AnsibleInventory(object):
     def __init__(self):
         self.groups = {}
         self.hosts = {}
@@ -214,7 +214,7 @@ class AnsibleInventory:
         return out
 
 
-class AnsibleHost:
+class AnsibleHost(object):
     def __init__(self, hostname, groups=None, host_vars=None):
         self.hostname = hostname
         self.groups = set(["all"])
@@ -235,7 +235,7 @@ class AnsibleHost:
         return dict(self.host_vars)
 
 
-class AnsibleGroup:
+class AnsibleGroup(object):
     def __init__(self, groupname, children=None, hosts=None, group_vars=None):
         self.groupname = groupname
         self.hosts = set()
