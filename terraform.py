@@ -68,13 +68,13 @@ class TerraformState(object):
             resources = self.state_json["resources"]
             for resource in resources:
                 for instance in resource["instances"]:
-                    yield TerraformResource(instance, type=resource["type"])
+                    yield TerraformResource(instance, resource_type=resource["type"])
 
 
 class TerraformResource(object):
-    def __init__(self, source_json, flat_attrs=False, type=None):
+    def __init__(self, source_json, flat_attrs=False, resource_type=None):
         self.flat_attrs = flat_attrs
-        self._type = type
+        self._type = resource_type
         self.source_json = source_json
 
     def is_ansible(self):
