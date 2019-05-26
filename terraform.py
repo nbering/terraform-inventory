@@ -1,5 +1,40 @@
 #!/usr/bin/env python
 
+'''
+Terraform Inventory Script
+==========================
+This inventory script generates dynamic inventory by reading Terraform state
+contents. Servers and groups a defined inside the Terraform state using special
+resources defined by the Terraform Provider for Ansible.
+
+Configuration
+=============
+
+State is fetched using the "terraform state pull" subcommand. The behaviour of
+this action can be configured using some environment variables.
+
+Environment Variables:
+......................
+
+    ANSIBLE_TF_BIN
+        Override the path to the Terraform command executable. This is useful if
+        you have multiple copies or versions installed and need to specify a
+        specific binary. The inventory script runs the `terraform state pull`
+        command to fetch the Terraform state, so that remote state will be
+        fetched seemlessly regardless of the backend configuration.
+
+    ANSIBLE_TF_DIR
+        Set the working directory for the `terraform` command when the scripts
+        shells out to it. This is useful if you keep your terraform and ansible
+        configuration in separate directories. Defaults to using the current
+        working directory.
+
+    ANSIBLE_TF_WS_NAME
+        Sets the workspace for the `terraform` command when the scripts shells
+        out to it, defaults to `default` workspace - if you don't use workspaces
+        this is the one you'll be using.
+'''
+
 import sys
 import json
 import os
