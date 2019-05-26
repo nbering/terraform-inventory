@@ -3,7 +3,7 @@ terraform {
 }
 
 provider "ansible" {
-  version = "~> 1.0.1"
+  version = "~> 1.0.2"
 }
 
 resource "ansible_host" "www" {
@@ -38,6 +38,13 @@ resource "ansible_host_var" "override" {
   value              = "eee"
 }
 
+resource "ansible_host_var" "underride" {
+  inventory_hostname = "www.example.com"
+  priority           = 10
+  key                = "bar"
+  value              = "ggg"
+}
+
 resource "ansible_group" "web" {
   inventory_group_name = "web"
   children             = ["foo", "bar", "baz"]
@@ -52,6 +59,13 @@ resource "ansible_group_var" "override" {
   inventory_group_name = "web"
   key                  = "foo"
   value                = "fff"
+}
+
+resource "ansible_group_var" "underride" {
+  inventory_group_name = "web"
+  priority             = 10
+  key                  = "bar"
+  value                = "hhh"
 }
 
 resource "ansible_group_var" "extra" {
