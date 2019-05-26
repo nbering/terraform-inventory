@@ -52,6 +52,7 @@ class TerraformState(object):
     TerraformState wraps the state content to provide some helpers for iterating
     over resources.
     '''
+
     def __init__(self, state_json):
         self.state_json = state_json
 
@@ -182,6 +183,7 @@ class AnsibleInventory(object):
     AnsibleInventory handles conversion from Terraform resource content to
     Ansible inventory entities, and building of the final inventory json.
     '''
+
     def __init__(self):
         self.groups = {}
         self.hosts = {}
@@ -198,32 +200,26 @@ class AnsibleInventory(object):
             host = AnsibleHost(hostname, source=resource)
             self.hosts[hostname] = host
 
+    def add_group_resource(self, resource):
+        '''Upsert type action for group resources.'''
+        groupname = resource.read_attr("inventory_group_name")
+
+        if groupname in self.groups:
+            group = self.groups[groupname]
+            group.add_source(resource)
+        else:
+            group = AnsibleGroup(groupname, source=resource)
+            self.groups[groupname] = group
+
     def update_groups(self, groupname, children=None, hosts=None, group_vars=None):
         '''Upsert type action for group resources'''
         if groupname in self.groups:
-            self.groups[groupname].update(
-                children=children, hosts=hosts, group_vars=group_vars)
+            group = self.groups[groupname]
+            group.update(children=children, hosts=hosts, group_vars=group_vars)
         else:
-            self.groups[groupname] = AnsibleGroup(
-                groupname, children=children, hosts=hosts, group_vars=group_vars)
-
-    def add_group_resource(self, resource):
-        '''Convert from Terraform ansible_group resource.'''
-        groupname = resource.read_attr("inventory_group_name")
-        children = resource.read_list_attr("children")
-        group_vars = resource.read_dict_attr("vars")
-
-        self.update_groups(groupname, children=children, group_vars=group_vars)
-
-    def add_group_var_resource(self, resource):
-        '''Convert from Terraform ansible_group_var resource.'''
-        groupname = resource.read_attr("inventory_group_name")
-        key = resource.read_attr("key")
-        value = resource.read_attr("value")
-
-        group_vars = {key: value}
-
-        self.update_groups(groupname, group_vars=group_vars)
+            group = AnsibleGroup(groupname)
+            group.update(children, hosts, group_vars)
+            self.groups[groupname] = group
 
     def add_resource(self, resource):
         '''
@@ -232,10 +228,8 @@ class AnsibleInventory(object):
         '''
         if resource.type().startswith("ansible_host"):
             self.add_host_resource(resource)
-        elif resource.type() == "ansible_group":
+        elif resource.type().startswith("ansible_group"):
             self.add_group_resource(resource)
-        elif resource.type() == "ansible_group_var":
-            self.add_group_var_resource(resource)
 
     def to_dict(self):
         '''
@@ -255,7 +249,7 @@ class AnsibleInventory(object):
             out["_meta"]["hostvars"][hostname] = host.get_vars()
 
         for groupname, group in self.groups.items():
-            group.tidy()
+            group.build()
             out[groupname] = group.to_dict()
 
         return out
@@ -265,6 +259,7 @@ class AnsibleHost(object):
     '''
     AnsibleHost represents a host for the Ansible inventory.
     '''
+
     def __init__(self, hostname, source=None):
         self.sources = []
         self.hostname = hostname
@@ -295,7 +290,8 @@ class AnsibleHost(object):
 
                 self.update(groups=groups, host_vars=host_vars)
             elif source.type() == "ansible_host_var":
-                host_vars = {source.read_attr("key"): source.read_attr("value")}
+                host_vars = {source.read_attr(
+                    "key"): source.read_attr("value")}
 
                 self.update(host_vars=host_vars)
         self.groups = sorted(self.groups)
@@ -309,13 +305,16 @@ class AnsibleGroup(object):
     '''
     AnsibleGroup represents a group for the Ansible inventory.
     '''
-    def __init__(self, groupname, children=None, hosts=None, group_vars=None):
+
+    def __init__(self, groupname, source=None):
         self.groupname = groupname
+        self.sources = []
         self.hosts = set()
         self.children = set()
         self.group_vars = {}
 
-        self.update(children=children, hosts=hosts, group_vars=group_vars)
+        if source:
+            self.add_source(source)
 
     def update(self, children=None, hosts=None, group_vars=None):
         '''
@@ -328,8 +327,25 @@ class AnsibleGroup(object):
         if group_vars:
             self.group_vars.update(group_vars)
 
-    def tidy(self):
-        '''Normailize group contents.'''
+    def add_source(self, source):
+        '''Add a Terraform resource to the sources list.'''
+        self.sources.append(source)
+
+    def build(self):
+        '''Assemble group details from registered sources.'''
+        self.sources.sort(key=lambda source: source.priority())
+        for source in self.sources:
+            if source.type() == "ansible_group":
+                children = source.read_list_attr("children")
+                group_vars = source.read_dict_attr("vars")
+
+                self.update(children=children, group_vars=group_vars)
+            elif source.type() == "ansible_group_var":
+                group_vars = {source.read_attr(
+                    "key"): source.read_attr("value")}
+
+                self.update(group_vars=group_vars)
+
         self.hosts = sorted(self.hosts)
         self.children = sorted(self.children)
 
