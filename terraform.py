@@ -107,8 +107,8 @@ class TerraformResource(object):
 
         priority = 0
 
-        if self.read_attr("priority") is not None:
-            priority = self.read_attr("priority")
+        if self.read_int_attr("priority") is not None:
+            priority = self.read_int_attr("priority")
         elif self.type() in TerraformResource.DEFAULT_PRIORITIES:
             priority = TerraformResource.DEFAULT_PRIORITIES[self.type()]
 
@@ -165,6 +165,17 @@ class TerraformResource(object):
 
             return out
         return attrs.get(key, None)
+
+    def read_int_attr(self, key):
+        '''
+        Read an attribute from state an convert it to type Int.
+        '''
+        val = self.read_attr(key)
+
+        if val is not None:
+            val = int(val)
+
+        return val
 
     def read_attr(self, key):
         '''
