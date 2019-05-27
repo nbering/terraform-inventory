@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Respect `variable_priority`, added in providers releases [0.0.6](https://github.com/nbering/terraform-provider-ansible/releases/tag/v0.0.6)/[1.0.2](https://github.com/nbering/terraform-provider-ansible/releases/tag/v1.0.2)
+
+### Changed
+- List values in output are now sorted for consistency, and to make regression testing easier
+- With state files where `variable_priority` is not set, the default values of 50 (for `ansible_host` and `ansible_group`) and 60 (for `ansible_host_var` and `ansible_group_var`) will be inferred, changing variable merging behaviour
 
 ## [2.1.0] - 2019-05-20
 ### Added
