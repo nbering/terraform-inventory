@@ -56,25 +56,24 @@ class TerraformState(object):
     def __init__(self, state_json):
         self.state_json = state_json
 
-        if "modules" in state_json:
-            # uses pre-0.12
-            self.flat_attrs = True
-        else:
-            # state format for 0.12+
-            self.flat_attrs = False
-
     def resources(self):
         '''Generator method to iterate over resources in the state file.'''
-        if self.flat_attrs:
+        if "modules" in self.state_json:
             modules = self.state_json["modules"]
             for module in modules:
                 for resource in module["resources"].values():
-                    yield TerraformResource(resource, flat_attrs=True)
+                    if self._is_ansible_resource(resource):
+                        yield TerraformResource(resource)
         else:
             resources = self.state_json["resources"]
             for resource in resources:
-                for instance in resource["instances"]:
-                    yield TerraformResource(instance, resource_type=resource["type"])
+                if self._is_ansible_resource(resource):
+                    for instance in resource["instances"]:
+                        yield TerraformResource(instance, resource_type=resource["type"])
+
+    def _is_ansible_resource(self, resource):
+        '''Check if the resource is provided by the ansible provider.'''
+        return resource["type"].startswith("ansible_")
 
 
 class TerraformResource(object):
@@ -90,8 +89,7 @@ class TerraformResource(object):
         'ansible_group_var': 60
     }
 
-    def __init__(self, source_json, flat_attrs=False, resource_type=None):
-        self.flat_attrs = flat_attrs
+    def __init__(self, source_json, resource_type=None):
         self._type = resource_type
         self._priority = None
         self.source_json = source_json
@@ -130,16 +128,14 @@ class TerraformResource(object):
         '''
         attrs = self._raw_attributes()
 
-        if self.flat_attrs:
-            out = {}
-            for k in attrs.keys():
-                match = re.match(r"^" + key + r"\.(.*)", k)
-                if not match or match.group(1) == "%":
-                    continue
+        out = {}
+        for k in attrs.keys():
+            match = re.match(r"^" + key + r"\.(.*)", k)
+            if not match or match.group(1) == "%":
+                continue
 
-                out[match.group(1)] = attrs[k]
-            return out
-        return attrs.get(key, {})
+            out[match.group(1)] = attrs[k]
+        return out
 
     def read_list_attr(self, key):
         '''
@@ -149,22 +145,20 @@ class TerraformResource(object):
         '''
         attrs = self._raw_attributes()
 
-        if self.flat_attrs:
-            out = []
+        out = []
 
-            length_key = key + ".#"
-            if length_key not in attrs.keys():
-                return []
+        length_key = key + ".#"
+        if length_key not in attrs.keys():
+            return []
 
-            length = int(attrs[length_key])
-            if length < 1:
-                return []
+        length = int(attrs[length_key])
+        if length < 1:
+            return []
 
-            for i in range(0, length):
-                out.append(attrs["{}.{}".format(key, i)])
+        for i in range(0, length):
+            out.append(attrs["{}.{}".format(key, i)])
 
-            return out
-        return attrs.get(key, None)
+        return out
 
     def read_int_attr(self, key):
         '''
@@ -184,9 +178,9 @@ class TerraformResource(object):
         return self._raw_attributes().get(key, None)
 
     def _raw_attributes(self):
-        if self.flat_attrs:
+        if "primary" in self.source_json:
             return self.source_json["primary"]["attributes"]
-        return self.source_json["attributes"]
+        return self.source_json["attributes_flat"]
 
 
 class AnsibleInventory(object):
@@ -396,8 +390,7 @@ def _main():
         inventory = AnsibleInventory()
 
         for resource in tfstate.resources():
-            if resource.is_ansible():
-                inventory.add_resource(resource)
+            inventory.add_resource(resource)
 
         sys.stdout.write(json.dumps(inventory.to_dict(), indent=2))
     except Exception:
