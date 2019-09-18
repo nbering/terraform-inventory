@@ -44,7 +44,7 @@ from subprocess import Popen, PIPE
 
 TERRAFORM_PATH = os.environ.get('ANSIBLE_TF_BIN', 'terraform')
 TERRAFORM_DIR = os.environ.get('ANSIBLE_TF_DIR', os.getcwd())
-TERRAFORM_WS_NAME = os.environ.get('ANSIBLE_TF_WS_NAME', 'default')
+TERRAFORM_WS_NAME = os.environ.get('ANSIBLE_TF_WS_NAME', None)
 
 
 class TerraformState(object):
@@ -370,24 +370,24 @@ class AnsibleGroup(object):
 
 
 def _execute_shell():
+    if TERRAFORM_WS_NAME is not None:
+        tf_workspace = [TERRAFORM_PATH, 'workspace', 'select', TERRAFORM_WS_NAME]
+        proc_ws = Popen(tf_workspace, cwd=TERRAFORM_DIR, stdout=PIPE,
+                        stderr=PIPE, universal_newlines=True)
+        _, err_ws = proc_ws.communicate()
+        if err_ws != '':
+            sys.stderr.write(str(err_ws)+'\n')
+            sys.exit(1)
     encoding = 'utf-8'
-    tf_workspace = [TERRAFORM_PATH, 'workspace', 'select', TERRAFORM_WS_NAME]
-    proc_ws = Popen(tf_workspace, cwd=TERRAFORM_DIR, stdout=PIPE,
-                    stderr=PIPE, universal_newlines=True)
-    _, err_ws = proc_ws.communicate()
-    if err_ws != '':
-        sys.stderr.write(str(err_ws)+'\n')
+    tf_command = [TERRAFORM_PATH, 'state', 'pull']
+    proc_tf_cmd = Popen(tf_command, cwd=TERRAFORM_DIR,
+                        stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    out_cmd, err_cmd = proc_tf_cmd.communicate()
+    if err_cmd != '':
+        sys.stderr.write(str(err_cmd)+'\n')
         sys.exit(1)
     else:
-        tf_command = [TERRAFORM_PATH, 'state', 'pull']
-        proc_tf_cmd = Popen(tf_command, cwd=TERRAFORM_DIR,
-                            stdout=PIPE, stderr=PIPE, universal_newlines=True)
-        out_cmd, err_cmd = proc_tf_cmd.communicate()
-        if err_cmd != '':
-            sys.stderr.write(str(err_cmd)+'\n')
-            sys.exit(1)
-        else:
-            return json.loads(out_cmd, encoding=encoding)
+        return json.loads(out_cmd, encoding=encoding)
 
 
 def _main():
