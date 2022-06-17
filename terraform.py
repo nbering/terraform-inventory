@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 Terraform Inventory Script
@@ -387,7 +387,7 @@ def _execute_shell():
             sys.stderr.write(str(err_cmd)+'\n')
             sys.exit(1)
         else:
-            return json.loads(out_cmd, encoding=encoding)
+            return json.loads(out_cmd)
 
 
 def _main():
